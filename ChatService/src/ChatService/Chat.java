@@ -57,21 +57,14 @@ public abstract class Chat extends Socket implements ChatService
 						current = _in.read(byteMessage);
 						message.append(new String(byteMessage, 0, current));
 						
-						if (message.toString().equalsIgnoreCase("\\close"))
+						if (message.toString().equalsIgnoreCase("//close"))
 						{
-							if (_waitingConfirmation)
-							{
-								Close();
-								continue;
-							}
-							else
-							{
-								FinishChat();
-							}
+							Send("//close");
+							Close();
 						}
 						else
 						{
-							_listener.Receive(message.toString());
+							ProcessMessage(message.toString());
 						}
 					}
 					catch (Exception ex)
@@ -97,7 +90,8 @@ public abstract class Chat extends Socket implements ChatService
 				_socket.close();
 			}
 			
-			_waitingConfirmation = false;
+			_closed = true;
+			_socket = null;
 		}
 		catch (IOException e)
 		{
@@ -125,14 +119,10 @@ public abstract class Chat extends Socket implements ChatService
 	{
 		try
 		{
-			String aux = "\\close";
-			
-			if (!_socket.isClosed())
+			if (_socket != null && !_socket.isClosed())
 			{
-				_out.write(aux.getBytes());
+				this.Send("//close");
 			}
-			
-			_waitingConfirmation = true;
 		}
 		catch (Exception ex)
 		{
@@ -158,5 +148,10 @@ public abstract class Chat extends Socket implements ChatService
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	public void ProcessMessage(String message)
+	{
+		_listener.Receive(message.toString());
 	}
 }

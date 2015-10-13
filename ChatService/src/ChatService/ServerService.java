@@ -37,7 +37,6 @@ public class ServerService extends Chat
 	@Override
 	public void FinishChat() throws IOException 
 	{
-		_serverSocket.close();
 		super.FinishChat();
 	}
 	
